@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: neurobudget-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false        # Set manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false        # Set manually in Render dashboard
+      - key: GROQ_API_KEY
+        sync: false        # Set manually in Render dashboard
+      - key: GROQ_MODEL
+        value: llama3-70b-8192
+      - key: FRONTEND_URL
+        sync: false        # Set to your Vercel URL after deploy
