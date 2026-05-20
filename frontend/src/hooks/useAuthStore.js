@@ -6,14 +6,25 @@ const useAuthStore = create((set, get) => ({
   token: null,
   isLoading: false,
   isAuthenticated: false,
+  hydrated: false,
 
   init: () => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('nb_token');
-      const user = localStorage.getItem('nb_user');
-      if (token && user) {
-        set({ token, user: JSON.parse(user), isAuthenticated: true });
+    if (typeof window === 'undefined') return;
+    // Prevent double-init
+    if (get().hydrated) return;
+    const token = localStorage.getItem('nb_token');
+    const userStr = localStorage.getItem('nb_user');
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        set({ token, user, isAuthenticated: true, hydrated: true });
+      } catch {
+        localStorage.removeItem('nb_token');
+        localStorage.removeItem('nb_user');
+        set({ hydrated: true });
       }
+    } else {
+      set({ hydrated: true });
     }
   },
 
@@ -24,7 +35,7 @@ const useAuthStore = create((set, get) => ({
       const { token, user } = res.data;
       localStorage.setItem('nb_token', token);
       localStorage.setItem('nb_user', JSON.stringify(user));
-      set({ token, user, isAuthenticated: true, isLoading: false });
+      set({ token, user, isAuthenticated: true, isLoading: false, hydrated: true });
       return { success: true };
     } catch (err) {
       set({ isLoading: false });
@@ -39,7 +50,7 @@ const useAuthStore = create((set, get) => ({
       const { token, user } = res.data;
       localStorage.setItem('nb_token', token);
       localStorage.setItem('nb_user', JSON.stringify(user));
-      set({ token, user, isAuthenticated: true, isLoading: false });
+      set({ token, user, isAuthenticated: true, isLoading: false, hydrated: true });
       return { success: true };
     } catch (err) {
       set({ isLoading: false });
@@ -50,7 +61,8 @@ const useAuthStore = create((set, get) => ({
   logout: () => {
     localStorage.removeItem('nb_token');
     localStorage.removeItem('nb_user');
-    set({ user: null, token: null, isAuthenticated: false });
+    set({ user: null, token: null, isAuthenticated: false, hydrated: true });
+    window.location.href = '/login';
   },
 
   updateUser: (user) => {

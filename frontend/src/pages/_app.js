@@ -1,12 +1,7 @@
-import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import useAuthStore from '../hooks/useAuthStore';
 import '../styles/globals.css';
 
 export default function App({ Component, pageProps }) {
-  const init = useAuthStore((s) => s.init);
-  useEffect(() => { init(); }, [init]);
-
   return (
     <>
       <Component {...pageProps} />
